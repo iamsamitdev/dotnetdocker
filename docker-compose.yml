@@ -1,0 +1,40 @@
+# Please refer https://aka.ms/HTTPSinContainer on how to setup an https developer certificate for your ASP .NET Core service.
+
+version: '3.4'
+
+services:
+
+  # sql server 2022 service
+  db:
+    image: mcr.microsoft.com/azure-sql-edge:latest
+    container_name: sqlserver
+    restart: always
+    environment:
+      - ACCEPT_EULA=1
+      - MSSQL_SA_PASSWORD=Samit@1234
+    # volumes:
+    #   - ./sqlserver_data:/var/opt/mssql
+    ports:
+      - 1433:1433
+    networks:
+      - web_network
+
+  # dotnet docker service
+  dotnetdocker:
+    image: dotnetdocker
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    container_name: dotnetdocker
+    restart: always
+    volumes:
+      - ./bin/Debug/net6.0/:/app
+    ports:
+      - 9191:9191
+    networks:
+      - web_network
+
+networks:
+  web_network:
+    name: dotnetdocker_network
+    driver: bridge
